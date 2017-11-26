@@ -9,6 +9,7 @@ Default implementation is `Never trust clients`, So collect only server-side inf
 But you can push additional parameter with initialization config.
 
 ### TODO
+
 Implement this:
 http://research.microsoft.com/pubs/156901/ndss2012.pdf
 
@@ -21,73 +22,83 @@ npm install express-fingerprint
 
 #### As a Express middleware
 
+Use with default parameters.
+
 ```javascript
-var Fingerprint = require('express-fingerprint')
+import Fingerprint, { parameter } from 'express-fingerprint'
+
+app.use(Fingerprint())
+```
+
+You can specify your own parameter.
+
+```javascript
 
 app.use(Fingerprint({
-	parameters:[
-		// Defaults
-		Fingerprint.useragent,
-		Fingerprint.acceptHeaders,
-		Fingerprint.geoip,
+  parameter: [
+    // Defaults
+    parameter.userAgent,
+    parameter.acceptHeaders,
+    parameter.geoip,
 
-		// Additional parameters
-		function(next) {
-			// ...do something...
-			next(null,{
-			'param1':'value1'
-			})
-		},
-		function(next) {
-			// ...do something...
-			next(null,{
-			'param2':'value2'
-			})
-		},
-	]
+    // Additional parameters
+    (req) => {
+      // do sync something...
+      return {
+        param1:'value1'
+      }
+    },
+    async (req) => {
+      // do async something...
+      const data = await asyncFunc()
+      return {
+        data
+      }
+    }
+  ]
 }))
 
-app.get('*',function(req,res,next) {
-	// Fingerprint object
-	console.log(req.fingerprint)
+app.get('*', (req,res,next) => {
+  // Fingerprint object
+  console.log(req.fingerprint)
 })
 ```
 
 req.fingerprint object is like below.
+
 ```javascript
 {
-	"hash": "bd767932c289b92b4de510f4c4d48246",
-	"components": {
-		"useragent": {
-			"browser": {
-				"family": "Chrome",
-				"version": "50"
-			},
-			"device": {
-				"family": "Other",
-				"version": "0"
-			},
-			"os": {
-				"family": "Mac OS",
-				"major": "10",
-				"minor":"11"
-		},
-		"acceptHeaders": {
-			"accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-			"encoding": "gzip, deflate, sdch",
-			"language": "en-US,en;q=0.8"
-		},
-		"geoip": {
-			"country": "US",
-			"resion": "CA",
-			"city": "San Francisco"
-		},
-		"param1": "value1",
-		"param2": "value2"
-	}
+  "hash": "bd767932c289b92b4de510f4c4d48246",
+  "components": {
+    "useragent": {
+      "browser": {
+        "family": "Chrome",
+        "version": "50"
+      },
+      "device": {
+        "family": "Other",
+        "version": "0"
+      },
+      "os": {
+        "family": "Mac OS",
+        "major": "10",
+        "minor":"11"
+    },
+    "acceptHeaders": {
+      "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+      "encoding": "gzip, deflate, sdch",
+      "language": "en-US,en;q=0.8"
+    },
+    "geoip": {
+      "country": "US",
+      "resion": "CA",
+      "city": "San Francisco"
+    },
+    "param1": "value1",
+    "param2": "value2"
+  }
 }
 ```
-
 
 ### List of fingerprinting sources
 
@@ -98,3 +109,7 @@ req.fingerprint object is like below.
 #### License
 
 MIT
+
+#### Author
+
+Yusuke Shibata
