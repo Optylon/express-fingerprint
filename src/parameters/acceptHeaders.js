@@ -1,8 +1,8 @@
-module.exports = function(next) {
-  next(null, {
+export default (req) => {
+  return {
     acceptHeaders:{
-      accept:this.req.headers['accept'],
-      language:this.req.headers['accept-language']
+      accept:req.headers['accept'],
+      language:req.headers['accept-language']
     }
-  })
+  }
 }

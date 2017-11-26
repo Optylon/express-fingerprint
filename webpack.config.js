@@ -1,9 +1,13 @@
-var nodeExternals = require('webpack-node-externals')
-var path = require('path')
+const webpack = require('webpack')
+const nodeExternals = require('webpack-node-externals')
+const path = require('path')
 
 module.exports = {
   entry: {
-    server:'./src/index'
+    index: [
+      'regenerator-runtime/runtime',
+      './src/index'
+    ]
   },
   watch: false,
   context: __dirname,
@@ -11,28 +15,36 @@ module.exports = {
     path: path.join(__dirname, 'lib'),
     filename: 'index.js',
     pathinfo: false,
-    library: 'index',
-    libraryTarget: 'umd'
+    libraryTarget: 'commonjs'
   },
   module:{
-    preLoaders: [
+    rules: [
       {
         test: /\.(js|jsx)$/,
-        include: 'src',
+        include: path.join(__dirname, 'src'),
+        enforce: 'pre',
         loader: 'eslint-loader'
-      }
-    ],
-    loaders: [
+      },
       {
         test: /\.(js|jsx)$/,
-        loader: 'babel-loader'
+        loader: 'babel-loader',
+        options: {
+          babelrc: false,
+          presets: [
+            [ 'env' , {
+              targets: {
+                node: '5'
+              }
+            }]
+          ],
+          plugins: [
+            'transform-function-bind',
+            'transform-object-rest-spread'
+          ]
+        }
       }
     ]
   },
-  resolve: {
-    extensions: ['', '.node.js', '.js'],
-    modulesDirectories: ['node_modules']
-  },
   target: 'node',
-  externals: [nodeExternals()]
+  externals: [nodeExternals({})]
 }

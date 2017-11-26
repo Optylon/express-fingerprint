@@ -1,52 +1,51 @@
 import murmurhash3js from 'murmurhash3js'
-import async from 'async'
-import parameters from './parameters'
 import traverse from 'traverse'
-const hash = murmurhash3js[process.arch]
 
-const Fingerprint = setting => {
+import useragent from './parameters/useragent'
+import acceptHeaders from './parameters/acceptHeaders'
+import geoip from './parameters/geoip'
+
+const { hash128 } = murmurhash3js[process.arch]
+
+export default (setting) => {
+
   const config = {
     parameters: [
-      Fingerprint.useragent,
-      Fingerprint.acceptHeaders,
-      Fingerprint.geoip
+      useragent,
+      acceptHeaders,
+      geoip
     ],
     ...setting
   }
 
-  return (req, res, next) => {
-    let components = {}
-    config.req = req
-    let fingerprint = { hash: null }
-    async.eachLimit(
-      config.parameters,
-      1,
-      (parameter, callback) => {
-        parameter.bind(config)((err, obj) => {
-          Object.keys(obj).forEach(key => {
-            components[key] = obj[key]
-          })
-          callback(err)
-        })
-      },
-      err => {
-        if(!err) {
-          let leaves = traverse(components).reduce(function(acc, x) {
-            if (this.isLeaf) acc.push(x)
-            return acc
-          }, [])
-          fingerprint.hash = hash.hash128(leaves.join('~~~'))
-          fingerprint.components = components // debug
-          req.fingerprint = fingerprint
+  return async (req, res, next) => {
+
+    const components = {}
+    const fingerprint = { hash: null }
+
+    try {
+
+      // process each parameters
+      for(let fn of config.parameters) {
+        const obj = await fn(req)
+        for(let key of Object.keys(obj)) {
+          components[key] = obj[key]
         }
-        next()
       }
-    )
+
+      // calculate hash
+      const leaves = traverse(components).reduce((acc, x) => {
+        if(this.isLeaf) acc.push(x)
+        return acc
+      }, [])
+      fingerprint.hash = hash128(leaves.join('~~~'))
+      fingerprint.components = components // debug
+
+      req.fingerprint = fingerprint
+      next()
+
+    } catch(err) {
+      next(err)
+    }
   }
 }
-
-Object.keys(parameters).forEach(key => {
-  Fingerprint[key] = parameters[key]
-})
-
-exports = module.exports = Fingerprint

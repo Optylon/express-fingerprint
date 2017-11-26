@@ -1,8 +1,8 @@
 import useragent from 'useragent'
 
-module.exports = function(next) {
-  const agent = useragent.parse(this.req.headers['user-agent'])
-  next(null, {
+export default (req) => {
+  const agent = useragent.parse(req.headers['user-agent'])
+  return {
     useragent: {
       browser:{
         family:agent.family,
@@ -18,6 +18,6 @@ module.exports = function(next) {
         minor:agent.os.minor
       }
     }
-  })
+  }
 }
 
