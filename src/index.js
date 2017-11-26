@@ -1,17 +1,16 @@
 import murmurhash3js from 'murmurhash3js'
 import traverse from 'traverse'
-
-import useragent from './parameters/useragent'
-import acceptHeaders from './parameters/acceptHeaders'
-import geoip from './parameters/geoip'
+import { userAgent, acceptHeaders, geoip } from './parameter'
 
 const { hash128 } = murmurhash3js[process.arch]
+
+export { default as parameter } from './parameter'
 
 export default (setting) => {
 
   const config = {
-    parameters: [
-      useragent,
+    parameter: [
+      userAgent,
       acceptHeaders,
       geoip
     ],
@@ -26,7 +25,7 @@ export default (setting) => {
     try {
 
       // process each parameters
-      for(let fn of config.parameters) {
+      for(let fn of config.parameter) {
         const obj = await fn(req)
         for(let key of Object.keys(obj)) {
           components[key] = obj[key]
