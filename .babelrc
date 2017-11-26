@@ -1,0 +1,14 @@
+{
+  "presets": [
+    [ "env" , {
+      "targets": {
+        "node": "5"
+      }
+    }]
+  ],
+  "plugins": [
+    "transform-function-bind",
+    "transform-object-rest-spread"
+  ]
+}
+

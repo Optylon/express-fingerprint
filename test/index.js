@@ -1,35 +1,37 @@
-var express = require('express')
-var Fingerprint = require('..')
+import 'babel-polyfill'
 
-var app = express()
+import { expect } from 'chai'
+import sinon from 'sinon'
+import middleware from '../src'
 
-app.use(Fingerprint({
-	parameters:[
-		Fingerprint.useragent,
-		Fingerprint.acceptHeaders,
-		Fingerprint.geoip,
-		function(next) {
-			next(null,{
-				param1:'value1',
-				param2:'value2'
-			})
-		},
-		function(next) {
-			next(null,{
-				param3:'value3',
-				param4:'value4'
-			})
-		}
-	]
-}))
+console.log(middleware)
 
-//
-app.set('port',10000)
-var server = app.listen(app.get('port'), function() {
-  console.log('Express server listening on port ' + server.address().port)
-})
-app.get('*',function(req,res) {
-	res.json({
-		fingerprint:req.fingerprint
-	})
+describe('my middleware', function() {
+
+  describe('request handler creation', function() {
+    var mw
+
+    beforeEach(function() {
+      mw = middleware(/./)
+    })
+
+    it('should return a function()', function() {
+      expect(mw).to.be.a.Function
+    })
+
+    it('should accept three arguments', function() {
+      expect(mw.length).to.equal(3)
+    })
+  })
+
+  describe('request handler calling', function() {
+    it('should call next() once', function() {
+      var mw      = middleware(/./)
+      var nextSpy = sinon.spy()
+
+      mw({}, {}, nextSpy)
+      expect(nextSpy.calledOnce).to.be.true
+    })
+  })
+
 })

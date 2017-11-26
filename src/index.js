@@ -14,6 +14,9 @@ export default (setting) => {
       acceptHeaders,
       geoip
     ],
+    getName: components => `${components.useragent.os.family} \
+${components.useragent.browser} \
+in ${components.geoip.country}`,
     ...setting
   }
 
@@ -38,7 +41,8 @@ export default (setting) => {
         return acc
       }, [])
       fingerprint.hash = hash128(leaves.join('~~~'))
-      fingerprint.components = components // debug
+      fingerprint.name = await config.getName(components)
+      fingerprint.components = components
 
       req.fingerprint = fingerprint
       next()

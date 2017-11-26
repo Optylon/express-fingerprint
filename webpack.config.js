@@ -27,21 +27,7 @@ module.exports = {
       },
       {
         test: /\.(js|jsx)$/,
-        loader: 'babel-loader',
-        options: {
-          babelrc: false,
-          presets: [
-            [ 'env' , {
-              targets: {
-                node: '5'
-              }
-            }]
-          ],
-          plugins: [
-            'transform-function-bind',
-            'transform-object-rest-spread'
-          ]
-        }
+        loader: 'babel-loader'
       }
     ]
   },
