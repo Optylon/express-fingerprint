@@ -1,22 +1,31 @@
 import murmurhash3js from 'murmurhash3js'
-import traverse from 'traverse'
-import { userAgent, acceptHeaders, geoip } from './parameter'
+import * as parameter from './parameter'
+import { set, get } from 'lodash'
 
 const { hash128 } = murmurhash3js[process.arch]
 
-export { default as parameter } from './parameter'
+export { parameter }
 
 export default (setting) => {
 
   const config = {
     parameter: [
-      userAgent,
-      acceptHeaders,
-      geoip
+      parameter.userAgent,
+      parameter.acceptHeaders,
+      parameter.geoip
     ],
-    getName: components => `${components.useragent.os.family} \
-${components.useragent.browser} \
-in ${components.geoip.country}`,
+    keys: [
+      'useragent.browser.family',
+      'useragent.browser.version',
+      'useragent.device.family',
+      'useragent.device.version',
+      'useragent.os.family',
+      'useragent.os.major',
+      'useragent.os.minor',
+      'acceptHeaders.accept',
+      'acceptHeaders.language',
+      'geoip.country',
+    ],
     ...setting
   }
 
@@ -35,14 +44,16 @@ in ${components.geoip.country}`,
         }
       }
 
+      const filtered = {}
       // calculate hash
-      const leaves = traverse(components).reduce((acc, x) => {
-        if(this.isLeaf) acc.push(x)
+      const leaves = config.keys.reduce((acc, key) => {
+        const value = get(components, key)
+        acc.push(value)
+        set(filtered, key, value)
         return acc
       }, [])
       fingerprint.hash = hash128(leaves.join('~~~'))
-      fingerprint.name = await config.getName(components)
-      fingerprint.components = components
+      fingerprint.components = filtered
 
       req.fingerprint = fingerprint
       next()
