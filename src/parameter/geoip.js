@@ -1,6 +1,6 @@
 import geoip from 'geoip-lite'
 
-export default async req => {
+export default req => {
   const geo = geoip.lookup(req.ip)
   return {
     geoip: {

@@ -24,12 +24,12 @@ export default (setting) => {
       'useragent.os.minor',
       'acceptHeaders.accept',
       'acceptHeaders.language',
-      'geoip.country',
+      'geoip.country'
     ],
     ...setting
   }
 
-  return async (req, res, next) => {
+  return (req, res, next) => {
 
     const components = {}
     const fingerprint = { hash: null }
@@ -38,7 +38,7 @@ export default (setting) => {
 
       // process each parameters
       for(let fn of config.parameter) {
-        const obj = await fn(req)
+        const obj = fn(req)
         for(let key of Object.keys(obj)) {
           components[key] = obj[key]
         }
